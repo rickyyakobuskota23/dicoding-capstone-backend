@@ -30,7 +30,8 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-_30p)1bocr4+=b
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
+_allowed_hosts_raw = os.environ.get('ALLOWED_HOSTS', '')
+ALLOWED_HOSTS = [h.strip() for h in _allowed_hosts_raw.split(',') if h.strip()] or ['*']
 
 
 # Application definition
@@ -141,7 +142,7 @@ STORAGES = {
     },
 }
 
-CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'dicoding-capstone-backend.railway.internal,https://dilearningstudio.rickykota.space/').split(',')
+CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'https://dilearningstudio.rickykota.space').split(',')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field
@@ -157,5 +158,5 @@ REST_FRAMEWORK = {
     ],
 }
 
-CLERK_SECRET_KEY = os.environ.get('sk_test_goGli74GNOV9bbh8JhIbAEBcdjaA843DqfjgZ1YFAJ')
-CLERK_JWKS_URL = os.environ.get('https://popular-sheepdog-30.clerk.accounts.dev/.well-known/jwks.json')
+CLERK_SECRET_KEY = os.environ.get('CLERK_SECRET_KEY')
+CLERK_JWKS_URL = os.environ.get('CLERK_JWKS_URL')
