@@ -142,7 +142,13 @@ STORAGES = {
     },
 }
 
-CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'https://dilearningstudio.rickykota.space').split(',')
+CORS_ALLOWED_ORIGINS = [
+    o.strip()
+    for o in os.environ.get('CORS_ALLOWED_ORIGINS', 'https://dilearningstudio.rickykota.space').split(',')
+    if o.strip()
+]
+# Allow any Vercel preview/production URL automatically
+CORS_ALLOWED_ORIGIN_REGEXES = [r"^https://.*\.vercel\.app$"]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field
