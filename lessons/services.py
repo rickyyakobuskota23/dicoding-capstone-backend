@@ -1,51 +1,42 @@
 import os
 import json
-import google.generativeai as genai
-from django.conf import settings
+from google import genai
+from google.genai import types
 
 class LessonGeneratorService:
     def __init__(self):
-        api_key = os.environ.get("GOOGLE_API_KEY")
-        if api_key:
-            genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
+        self._api_key = os.environ.get("GOOGLE_API_KEY")
 
     def generate_lesson_plan(self, form_data):
-        """
-        Generates a lesson plan using Google Gemini based on the provided form data.
-        """
         prompt = self._build_prompt(form_data)
-        
+
         try:
-            # Check if API Key is configured
-            if not os.environ.get("GOOGLE_API_KEY"):
+            if not self._api_key:
                 print("GOOGLE_API_KEY not found in environment variables")
                 return self._get_fallback_plan(form_data)
 
-            response = self.model.generate_content(
-                prompt,
-                generation_config=genai.types.GenerationConfig(
+            client = genai.Client(api_key=self._api_key)
+            response = client.models.generate_content(
+                model="gemini-1.5-flash",
+                contents=prompt,
+                config=types.GenerateContentConfig(
                     response_mime_type="application/json",
-                )
+                ),
             )
-            
-            # The model should return a JSON string
+
             if not response or not response.text:
                 print("Empty response from Gemini API")
                 return self._get_fallback_plan(form_data)
-                
-            plan_data = json.loads(response.text)
-            return plan_data
+
+            return json.loads(response.text)
         except Exception as e:
-            # Check if it's a quota error (429) or other API errors
             error_str = str(e).lower()
             print(f"Error in Gemini generation: {error_str}")
-            
+
             if any(indicator in error_str for indicator in ["429", "quota", "rate_limit", "resource_exhausted"]):
-                print(f"API Limit or Quota exceeded, returning fallback data")
+                print("API limit or quota exceeded, returning fallback data")
                 return self._get_fallback_plan(form_data)
-            
-            # For other errors, we still might want to return a fallback instead of crashing the UI
+
             return self._get_fallback_plan(form_data)
 
     def _get_fallback_plan(self, data):
