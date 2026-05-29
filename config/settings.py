@@ -31,7 +31,20 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-_30p)1bocr4+=b
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
 _allowed_hosts_raw = os.environ.get('ALLOWED_HOSTS', '')
-ALLOWED_HOSTS = [h.strip() for h in _allowed_hosts_raw.split(',') if h.strip()] or ['*']
+ALLOWED_HOSTS = [h.strip() for h in _allowed_hosts_raw.split(',') if h.strip()]
+
+# Railway injects the service's public domain at runtime; always trust it
+# so the app keeps working even if ALLOWED_HOSTS isn't configured manually.
+_railway_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+if _railway_domain and _railway_domain not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(_railway_domain)
+
+# Last-resort fallback so the app never hard-fails every request on a misconfig.
+if not ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ['*']
+
+# Trust the Railway domain for CSRF (needed for the Django admin over HTTPS).
+CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS if h not in ('*', 'localhost', '127.0.0.1')]
 
 
 # Application definition
