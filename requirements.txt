@@ -1,0 +1,10 @@
+django>=6.0.0
+djangorestframework
+django-cors-headers
+python-dotenv
+google-generativeai
+PyJWT[crypto]
+whitenoise
+gunicorn
+psycopg2-binary>=2.9.0
+dj-database-url>=2.1.0
